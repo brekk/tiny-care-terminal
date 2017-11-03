@@ -23,6 +23,7 @@
     "git-user-name": "^2.0.0",
     "gitlog": "^3.1.0",
     "html-to-text": "^3.3.0",
+    "imgcat": "^2.3.0",
     "is-git": "^1.0.0",
     "node-notifier": "^5.1.2",
     "resolve-dir": "^1.0.0",

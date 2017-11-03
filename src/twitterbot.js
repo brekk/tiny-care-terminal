@@ -1,12 +1,9 @@
 import Twit from 'twit'
-import htmlToText from 'html-to-text'
 import scraperjs from 'scraperjs'
-import {random, pipe, indexOf} from 'f-utility'
+import {random, indexOf} from 'f-utility'
 
 import config from './config'
 import barf from './barf'
-
-const {fromString} = htmlToText
 
 const T = new Twit({
   consumer_key: config.keys.consumer_key,
