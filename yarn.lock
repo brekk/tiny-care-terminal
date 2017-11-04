@@ -2020,6 +2020,13 @@ concurrently@^3.4.0:
     supports-color "^3.2.3"
     tree-kill "^1.1.0"
 
+concurrify@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/concurrify/-/concurrify-1.0.1.tgz#1febe4b4615d4a86ee293a39713ffad5feb9681e"
+  dependencies:
+    sanctuary-type-classes "^6.0.0"
+    sanctuary-type-identifiers "^2.0.0"
+
 console-browserify@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/console-browserify/-/console-browserify-1.1.0.tgz#f0241c45730a9fc6323b206dbf38edc741d0bb10"
@@ -2315,6 +2322,10 @@ delayed-stream@~1.0.0:
 delegates@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/delegates/-/delegates-1.0.0.tgz#84c6e159b81904fdca59a0ef44cd870d31250f9a"
+
+denque@^1.1.1:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/denque/-/denque-1.2.2.tgz#e06cf7cf0da8badc88cbdaabf8fc0a70d659f1d4"
 
 depcheck@^0.6.7:
   version "0.6.8"
@@ -3309,6 +3320,16 @@ flatmap-fast@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/flatmap-fast/-/flatmap-fast-3.0.0.tgz#a3c6ed484b1649f13b15683b18a8bc9db54c59be"
 
+fluture@^7.2.2:
+  version "7.2.2"
+  resolved "https://registry.yarnpkg.com/fluture/-/fluture-7.2.2.tgz#6e1cc88e42dace967822d543b86bb9b9396b585a"
+  dependencies:
+    concurrify "^1.0.0"
+    denque "^1.1.1"
+    inspect-f "^1.2.0"
+    sanctuary-type-classes "^6.0.0"
+    sanctuary-type-identifiers "^2.0.0"
+
 for-in@^1.0.1, for-in@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/for-in/-/for-in-1.0.2.tgz#81068d295a8142ec0ac726c6e2200c30fb6d5e80"
@@ -4034,6 +4055,10 @@ inquirer@^3.0.6:
     string-width "^2.1.0"
     strip-ansi "^4.0.0"
     through "^2.3.6"
+
+inspect-f@^1.2.0:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/inspect-f/-/inspect-f-1.2.1.tgz#117573b5df57a509de6fe401131d426bac1592b5"
 
 interpret@^1.0.0:
   version "1.0.4"
@@ -6820,6 +6845,20 @@ safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@^5.1.1, safe-buffer@~5.1.0, 
 safe-json-parse@~1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/safe-json-parse/-/safe-json-parse-1.0.1.tgz#3e76723e38dfdda13c9b1d29a1e07ffee4b30b57"
+
+sanctuary-type-classes@^6.0.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/sanctuary-type-classes/-/sanctuary-type-classes-6.1.0.tgz#6bd67044358c8440d561e6e2556ab88dd8cd8001"
+  dependencies:
+    sanctuary-type-identifiers "1.0.x"
+
+sanctuary-type-identifiers@1.0.x:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/sanctuary-type-identifiers/-/sanctuary-type-identifiers-1.0.0.tgz#e8f359f006cb5e624cfb8464603fc114608bde9f"
+
+sanctuary-type-identifiers@^2.0.0:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/sanctuary-type-identifiers/-/sanctuary-type-identifiers-2.0.1.tgz#fc524cf6dd92cebfcbb0dd9509eff193159a20ed"
 
 sane@^2.0.0:
   version "2.2.0"

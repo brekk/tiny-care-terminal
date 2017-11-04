@@ -1,19 +1,19 @@
 // import path from 'path'
-import gitchoUsername from 'git-user-name'
+import username from 'git-user-name'
 import resolve from 'resolve-dir'
 import subdirs from 'subdirs'
 import isGit from 'is-git'
 import gitlog from 'gitlog'
 import async from 'async'
-import {I, pipe, curry} from 'f-utility'
+import {I, curry, pipe} from 'f-utility'
 import {e0} from 'entrust'
 
-import barf from './barf'
+// import barf from './barf'
 
 const sort = e0(`sort`)
 const reverse = e0(`reverse`)
 
-const author = gitchoUsername()
+const author = username()
 
 const fail = curry((cb, x) => cb(new Error(x), null))
 
@@ -54,7 +54,10 @@ function findGitRepos(repos, depth, callback) {
       }, repoDone)
     })
   }, (err) => {
-    callback(err, allRepos.sort().reverse())
+    callback(err, pipe(
+      sort,
+      reverse
+    )(allRepos))
   })
 }
 

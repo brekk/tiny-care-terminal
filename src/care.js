@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import path from 'path'
-import {spawn} from 'child_process'
+// import {spawn} from 'child_process'
 import ansiArt from 'ansi-art'
 import blessed from 'blessed'
 import bunnySay from 'sign-bunny'
@@ -9,7 +9,8 @@ import contrib from 'blessed-contrib'
 import notifier from 'node-notifier'
 import weather from 'weather-js'
 import yosay from 'yosay'
-import {curry, map} from 'f-utility'
+import execa from 'execa'
+import {pipe, merge, curry, map} from 'f-utility'
 
 import barf from './barf'
 import config from './config'
@@ -78,7 +79,7 @@ const pomodoroHandlers = map(tomatoStyle, {
 const pom = pomodoro(pomodoroHandlers)
 
 const makeBox = (label) => ({
-  label: label,
+  label,
   tags: true,
   border: {
     type: `line`
@@ -90,32 +91,28 @@ const makeBox = (label) => ({
   }
 })
 
-const makeScrollBox = (label) => (
-  Object.assign(
-    makeBox(label),
-    {
-      scrollable: true,
-      scrollbar: { ch: ` ` },
-      style: {
-        scrollbar: { bg: `green`, fg: `white` }
-      },
-      keys: true,
-      vi: true,
-      alwaysScroll: true,
-      mouse: true
-    }
-  )
+const makeScrollBox = pipe(
+  makeBox,
+  merge({
+    scrollable: true,
+    scrollbar: { ch: ` ` },
+    style: {
+      scrollbar: { bg: `green`, fg: `white` }
+    },
+    keys: true,
+    vi: true,
+    alwaysScroll: true,
+    mouse: true
+  })
 )
 
-const makeGraphBox = (label) => (
-  Object.assign(
-    makeBox(label),
-    {
-      barWidth: 5,
-      xOffset: 4,
-      maxHeight: 10
-    }
-  )
+const makeGraphBox = pipe(
+  makeBox,
+  merge({
+    barWidth: 5,
+    xOffset: 4,
+    maxHeight: 10
+  })
 )
 
 const updateCommitsGraph = (today, week) => commits.setData(
@@ -243,22 +240,20 @@ function doTheTweets() {
       if (POMODORO_MODE) {
         return
       }
-      twitterbot.getTweet(config.twitter[which]).then((tweet) => {
-        parrotBox.content = getAnsiArt(tweet.text)
+      const primaryRender = (tweet = {}) => {
+        const {text = `You're doing just fine!`} = tweet
+        parrotBox.content = getAnsiArt(text)
         screen.render()
-      }, () => {
-        // Just in case we don't have tweets.
-        parrotBox.content = getAnsiArt(`Hi! You're doing great!!!`)
-        screen.render()
-      })
+      }
+      twitterbot.getTweet(config.twitter[which]).fork(primaryRender, primaryRender)
     } else {
-      twitterbot.getTweet(config.twitter[which]).then((tweet) => {
-        tweetBoxes[tweet.bot.toLowerCase()].content = tweet.text
-        screen.render()
-      }, () => {
+      twitterbot.getTweet(config.twitter[which]).fork(() => {
         tweetBoxes[config.twitter[1]].content = tweetBoxes[config.twitter[2]].content = (
           `Can't read Twitter without some API keys  🐰. Maybe try the scraping version instead?`
         )
+      }, (tweet) => {
+        tweetBoxes[tweet.bot.toLowerCase()].content = tweet.text
+        screen.render()
       })
     }
   }
@@ -281,17 +276,16 @@ function doTheCodes() {
 
   const helper = `sh ${path.resolve(`standup-helper.sh`)}`
   if (config.gitbot.toLowerCase() === `gitstandup`) {
-    const today = spawn(helper, [`-m ` + config.depth, config.repos], {shell: true})
+    const today = execa(helper, [`-m ` + config.depth, config.repos])
+    const week = execa(helper, [`-m ` + config.depth + ` -d 7`, config.repos])
     todayBox.content = ``
-    today.stdout.on(`data`, (data) => {
+    weekBox.content = ``
+    today.then((data) => {
       todayCommits = getCommits(`${data}`, todayBox)
       updateCommitsGraph(todayCommits, weekCommits)
       screen.render()
     })
-
-    const week = spawn(helper, [`-m ` + config.depth + ` -d 7`, config.repos], {shell: true})
-    weekBox.content = ``
-    week.stdout.on(`data`, (data) => {
+    week.then((data) => {
       weekCommits = getCommits(`${data}`, weekBox)
       updateCommitsGraph(todayCommits, weekCommits)
       screen.render()

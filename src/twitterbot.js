@@ -1,6 +1,7 @@
 import Twit from 'twit'
 import scraperjs from 'scraperjs'
-import {random, indexOf} from 'f-utility'
+import {pipe, random, indexOf} from 'f-utility'
+import Future from 'fluture'
 
 import config from './config'
 import barf from './barf'
@@ -24,7 +25,7 @@ function getTweet(who) {
 
 function apiTweet(who) {
   options.screen_name = who
-  return new Promise(function apiTweetAsync(resolve, reject) {
+  return new Future((reject, resolve) => {
     T.get(`statuses/user_timeline`, options, function getData(err, data) {
       if (err) {
         reject(`This didn't work. Maybe you didn't set up the twitter API keys?`)
@@ -35,29 +36,40 @@ function apiTweet(who) {
   })
 }
 
-function scrapeTweet(who) {
-  const url = `https://twitter.com/${who}`
+const scrapeTweets = ($) => $(`.js-tweet-text.tweet-text`).map(
+  function perTweet() {
+    return $(this).text()
+  }
+).get()
+
+const fixLinks = (x) => {
+  const pics = indexOf(`pic.twitter`, x)
+  return (
+    pics === -1 ?
+      x :
+      x.substr(0, pics) + ` ` + x.substr(pics)
+  )
+}
+const futurify = (x) => new Future((reject, resolve) => {
+  x.then(resolve, reject)
+})
+
+function scrapeTweet(bot) {
+  const url = `https://twitter.com/${bot}`
   barf(`scraping ${url} ...`)
-  return new Promise((resolve, reject) => {
-    scraperjs.StaticScraper.create(url)
-      .scrape(($) => {
-        return $(`.js-tweet-text.tweet-text`).map(function mapFn() {
-          return $(this).text()
-        }).get()
+  const promise = scraperjs.StaticScraper.create(url).scrape(scrapeTweets)
+  return futurify(promise)
+    .map(pipe(
+      random.pick,
+      fixLinks,
+      (text) => ({
+        text,
+        bot
       })
-      .then((tweets) => {
-        const tweet = random.pick(tweets)
-        const pics = indexOf(`pic.twitter`, tweet)
-        const fix = (x) => (
-          pics === -1 ?
-            x :
-            x.substr(0, pics) + ` ` + x.substr(pics)
-        )
-        resolve({text: fix(tweet), bot: who})
-      }, () => {
-        reject(`Can't scrape tweets. Maybe the user is private or doesn't exist?`)
-      })
-  })
+    ))
+    .mapRej(
+      () => new Error(`Can't scrape tweets. Maybe the user is private or doesn't exist?`)
+    )
 }
 
 module.exports.getTweet = getTweet

@@ -15,7 +15,7 @@ const config = {
     env(`TTC_BOTS`),
     toLowerCase,
     split(`,`)
-  )(`echojs,selfcare_bot,magicrealismbot,jennyholzer,picdescbot`),
+  )(`javascriptdaily,selfcare_bot,magicrealismbot,jennyholzer,picdescbot`),
 
   // Use this to have a different animal say a message in the big box.
   say: pipe(
