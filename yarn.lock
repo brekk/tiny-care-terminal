@@ -3161,6 +3161,16 @@ extsprintf@1.3.0, extsprintf@^1.2.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.3.0.tgz#96918440e3041a7a414f8c52e3c574eb3c3e1e05"
 
+f-utility@3.3.5:
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/f-utility/-/f-utility-3.3.5.tgz#67380e79889f989c16306d124a56bee9b76e9b21"
+  dependencies:
+    entrust "0.0.11"
+    fantasy-land "3.4.0"
+    fast.js "^0.1.1"
+    flatmap-fast "^3.0.0"
+    katsu-curry "^0.6.0"
+
 f-utility@^3.5.1:
   version "3.5.1"
   resolved "https://registry.yarnpkg.com/f-utility/-/f-utility-3.5.1.tgz#2586c0f495beeaf32cd288faafde2985671109e2"
@@ -8099,6 +8109,12 @@ xtend@~2.1.1:
   resolved "https://registry.yarnpkg.com/xtend/-/xtend-2.1.2.tgz#6efecc2a4dad8e6962c4901b337ce7ba87b5d28b"
   dependencies:
     object-keys "~0.4.0"
+
+xtrace@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/xtrace/-/xtrace-0.1.6.tgz#a12332a8a019d0887c9d57c2b029e7cdbcad01db"
+  dependencies:
+    f-utility "3.3.5"
 
 y18n@^3.2.1:
   version "3.2.1"

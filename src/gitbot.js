@@ -1,15 +1,22 @@
 // import path from 'path'
 import username from 'git-user-name'
-import resolve from 'resolve-dir'
+import resolveDir from 'resolve-dir'
 import subdirs from 'subdirs'
 import isGit from 'is-git'
 import gitlog from 'gitlog'
 import async from 'async'
-import {I, curry, pipe} from 'f-utility'
-import {e0} from 'entrust'
+import {fork, filter, map, I, curry, pipe} from 'f-utility'
+import {trace} from 'xtrace'
+import {e0, e1} from 'entrust'
+import Future from 'fluture'
 
-// import barf from './barf'
+const later = (x) => new Future(x)
 
+const all = (x) => Future.parallel(Infinity, x)
+
+import barf from './barf'
+
+const mapRej = e1(`mapRej`)
 const sort = e0(`sort`)
 const reverse = e0(`reverse`)
 
@@ -17,15 +24,61 @@ const author = username()
 
 const fail = curry((cb, x) => cb(new Error(x), null))
 
+// const subdirsF = Future.encaseN2(subdirs)
+const subdirsF = curry(
+  (repo, depth) => later((reject, resolve) => {
+    subdirs(repo, depth, (err, data) => (
+      err ?
+        reject(err) :
+        resolve(data.concat(repo))
+    ))
+  })
+)
+// const isGitF = Future.encaseN(isGit)
+const isGitF = curry(
+  (path) => later((reject, resolve) => {
+    isGit(path, (err, data) => (
+      err ?
+        reject(err) :
+        resolve(data)
+    ))
+  })
+)
+const isDotGit = (x) => x.indexOf(`.git`) > -1
+
 /*
 Go through all `repos` and look for subdirectories up to a given `depth`
 and look for repositories.
 Calls `callback` with array of repositories.
 */
 function findGitRepos(repos, depth, callback) {
+  pipe(
+    trace(`A`),
+    map(pipe(
+      resolveDir,
+      (repo) => subdirsF(repo, depth)
+    )),
+    trace(`B mapped`),
+    all,
+    map(([x]) => x),
+    // map(filter((dir) => {
+    //   // console.log(isDotGit(dir), `<<<<`, isGit(dir))
+    //   // return (!(dir.indexOf(`.git`) > -1) && isGit(dir))
+    //   return true
+    // })),
+    trace(`C mapped`),
+    // map(map(isGit)),
+    trace(`D great?!?!?!`),
+    fork(callback, (x) => callback(null, x))
+    // fork(I, I)
+    // (d) => d.fork(I, I),
+    // trace(`E OUT??E?E?E`),
+  )(repos)
+  // console.log(`f`, data)
+  /*
   let allRepos = []
   async.each(repos, (repo, repoDone) => {
-    repo = resolve(repo)
+    repo = resolveDir(repo)
     subdirs(repo, depth, (err, dirs) => {
       const bail = fail(callback)
       if (err) {
@@ -42,9 +95,9 @@ function findGitRepos(repos, depth, callback) {
         dirs.push(repo)
       }
       async.each(dirs, (dir, dirDone) => {
-        isGit(dir, (dirError, git) => {
-          if (dirError) {
-            return fail(callback, dirError)
+        isGit(dir, (error, git) => {
+          if (error) {
+            return fail(callback, error)
           }
           if (!dir.includes(`.git`) && git) {
             allRepos.push(dir)
@@ -59,6 +112,7 @@ function findGitRepos(repos, depth, callback) {
       reverse
     )(allRepos))
   })
+  */
 }
 
 /*

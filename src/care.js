@@ -280,12 +280,13 @@ function doTheCodes() {
     const week = execa(helper, [`-m ` + config.depth + ` -d 7`, config.repos])
     todayBox.content = ``
     weekBox.content = ``
-    today.then((data) => {
+    today.stdout.on(`data`, (data) => {
       todayCommits = getCommits(`${data}`, todayBox)
       updateCommitsGraph(todayCommits, weekCommits)
       screen.render()
     })
-    week.then((data) => {
+
+    week.stdout.on(`data`, (data) => {
       weekCommits = getCommits(`${data}`, weekBox)
       updateCommitsGraph(todayCommits, weekCommits)
       screen.render()

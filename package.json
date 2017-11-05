@@ -34,6 +34,7 @@
     "subdirs": "^1.0.1",
     "twit": "^2.2.5",
     "weather-js": "^2.0.0",
+    "xtrace": "^0.1.6",
     "yosay": "^2.0.0"
   },
   "peerDependencies": {
