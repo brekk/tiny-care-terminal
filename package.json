@@ -28,6 +28,7 @@
     "imgcat": "^2.3.0",
     "is-git": "^1.0.0",
     "node-notifier": "^5.1.2",
+    "path-exists": "^3.0.0",
     "resolve-dir": "^1.0.0",
     "scraperjs": "^1.2.0",
     "sign-bunny": "^1.0.0",

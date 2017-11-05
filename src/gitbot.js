@@ -10,8 +10,6 @@ import {trace} from 'xtrace'
 import {e0, e1} from 'entrust'
 import Future from 'fluture'
 
-const later = (x) => new Future(x)
-
 const all = (x) => Future.parallel(Infinity, x)
 
 import barf from './barf'
@@ -26,7 +24,7 @@ const fail = curry((cb, x) => cb(new Error(x), null))
 
 // const subdirsF = Future.encaseN2(subdirs)
 const subdirsF = curry(
-  (repo, depth) => later((reject, resolve) => {
+  (repo, depth) => new Future((reject, resolve) => {
     subdirs(repo, depth, (err, data) => (
       err ?
         reject(err) :
@@ -53,66 +51,14 @@ Calls `callback` with array of repositories.
 */
 function findGitRepos(repos, depth, callback) {
   pipe(
-    trace(`A`),
     map(pipe(
       resolveDir,
       (repo) => subdirsF(repo, depth)
     )),
-    trace(`B mapped`),
     all,
     map(([x]) => x),
-    // map(filter((dir) => {
-    //   // console.log(isDotGit(dir), `<<<<`, isGit(dir))
-    //   // return (!(dir.indexOf(`.git`) > -1) && isGit(dir))
-    //   return true
-    // })),
-    trace(`C mapped`),
-    // map(map(isGit)),
-    trace(`D great?!?!?!`),
     fork(callback, (x) => callback(null, x))
-    // fork(I, I)
-    // (d) => d.fork(I, I),
-    // trace(`E OUT??E?E?E`),
   )(repos)
-  // console.log(`f`, data)
-  /*
-  let allRepos = []
-  async.each(repos, (repo, repoDone) => {
-    repo = resolveDir(repo)
-    subdirs(repo, depth, (err, dirs) => {
-      const bail = fail(callback)
-      if (err) {
-        switch (err.code) {
-        case `ENOENT`:
-          return bail(`Could not open directory directory: ${err.path}\n`)
-        case `EACCES`:
-          return // ignore if no access
-        default:
-          return bail(`Error "${err.code}" doing "${err.syscall}" on directory: ${err.path}\n`)
-        }
-      }
-      if (dirs) {
-        dirs.push(repo)
-      }
-      async.each(dirs, (dir, dirDone) => {
-        isGit(dir, (error, git) => {
-          if (error) {
-            return fail(callback, error)
-          }
-          if (!dir.includes(`.git`) && git) {
-            allRepos.push(dir)
-          }
-          dirDone()
-        })
-      }, repoDone)
-    })
-  }, (err) => {
-    callback(err, pipe(
-      sort,
-      reverse
-    )(allRepos))
-  })
-  */
 }
 
 /*
