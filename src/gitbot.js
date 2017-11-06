@@ -2,17 +2,26 @@
 import username from 'git-user-name'
 import resolveDir from 'resolve-dir'
 import subdirs from 'subdirs'
-import isGit from 'is-git'
+// import isGit from 'is-git'
 import gitlog from 'gitlog'
 import async from 'async'
-import {fork, filter, map, I, curry, pipe} from 'f-utility'
+import {
+  fork,
+  filter,
+  map,
+  I,
+  curry,
+  pipe,
+  length,
+  prop
+} from 'f-utility'
+
 import {trace} from 'xtrace'
 import {e0, e1} from 'entrust'
 import Future from 'fluture'
+import barf from './barf'
 
 const all = (x) => Future.parallel(Infinity, x)
-
-import barf from './barf'
 
 const mapRej = e1(`mapRej`)
 const sort = e0(`sort`)
@@ -21,6 +30,8 @@ const reverse = e0(`reverse`)
 const author = username()
 
 const fail = curry((cb, x) => cb(new Error(x), null))
+
+const gt = curry((b, a) => a > b)
 
 // const subdirsF = Future.encaseN2(subdirs)
 const subdirsF = curry(
@@ -33,16 +44,7 @@ const subdirsF = curry(
   })
 )
 // const isGitF = Future.encaseN(isGit)
-const isGitF = curry(
-  (path) => later((reject, resolve) => {
-    isGit(path, (err, data) => (
-      err ?
-        reject(err) :
-        resolve(data)
-    ))
-  })
-)
-const isDotGit = (x) => x.indexOf(`.git`) > -1
+// const isDotGit = (x) => x.indexOf(`.git`) > -1
 
 /*
 Go through all `repos` and look for subdirectories up to a given `depth`
@@ -66,6 +68,39 @@ function findGitRepos(repos, depth, callback) {
  * Calls `callback` with line-seperated-strings of the formatted commits.
  */
 function getCommitsFromRepos(repos, days, callback) {
+  /*
+  pipe(
+    // array functor
+    trace(`input!`),
+    map(gitlog),
+    // Future functor
+    trace(`glogged!`),
+    map((c) => {
+      console.log(c, `<<<<<<< CCCC`)
+      barf(`c`, c)
+      return ([
+        `${c.abbrevHash}`,
+        `-`,
+        `${c.subject}`,
+        `(${c.authorDateRel})`,
+        `<${c.authorName.replace(`@end@\n`, ``)}>`
+      ].join(` `))
+    }),
+    trace(`mapped!`),
+    all,
+    // Future.map(filter)
+    map(
+      pipe(
+        prop(`status`),
+        length,
+        gt(0),
+        filter
+      )
+    ),
+    fork(callback, (x) => callback(null, x))
+  )(repos)
+  */
+  // /*
   let cmts = []
   async.each(repos, (repo, repoDone) => {
     try {
@@ -111,6 +146,7 @@ function getCommitsFromRepos(repos, days, callback) {
   }, (err) => {
     callback(err, cmts.length > 0 ? cmts.join(`\n`) : `Nothing yet. Start small!`)
   })
+  // */
 }
 
 export default {

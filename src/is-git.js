@@ -3,6 +3,7 @@ import parseGitConfig from 'parse-git-config'
 import pathExists from 'path-exists'
 import {e0, e1} from 'entrust'
 import {
+  curry,
   K,
   map,
   chain,
@@ -13,10 +14,10 @@ import {
   split,
   keys
 } from 'f-utility'
-import {trace} from 'xtrace'
+// import {trace} from 'xtrace'
 import Future from 'fluture'
 
-const exists = Future.encaseP(pathExists)
+const checkPathExists = Future.encaseP(pathExists)
 const parser = (cwd) => new Future(
   (reject, resolve) => parseGitConfig({cwd, path: `.git/config`}, (err, config) => (
     err ?
@@ -40,19 +41,33 @@ const forceTrailingSlash = (x) => (
     x + `/`
 )
 
+const parseConfig = curry(
+  (path, extant) => (
+    extant ?
+      parser(path) :
+      Future.of(false)
+  )
+)
+
+const checkForCore = pipe(
+  propOr({}, `core`),
+  keys,
+  length,
+  (l) => l > 0
+)
+const inAllBadCasesReturnFalse = pipe(
+  K,
+  mapRej
+)(false)
+
 const isGit = (path) => pipe(
   getFolderName,
   forceTrailingSlash,
   add(`.git/config`),
-  exists,
-  chain((extant) => extant ? parser(path) : Future.of(false)),
-  map(pipe(
-    propOr(false, `core`),
-    keys,
-    length,
-    (l) => l > 0
-  )),
-  mapRej(K(false))
+  checkPathExists,
+  chain(parseConfig(path)),
+  map(checkForCore),
+  inAllBadCasesReturnFalse
 )(path)
 
 export default isGit
