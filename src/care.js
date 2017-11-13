@@ -10,7 +10,7 @@ import notifier from 'node-notifier'
 import weather from 'weather-js'
 import yosay from 'yosay'
 import execa from 'execa'
-import {pipe, merge, curry, map} from 'f-utility'
+import {I, pipe, merge, curry, map} from 'f-utility'
 
 import barf from './barf'
 import config from './config'
@@ -31,7 +31,7 @@ const BLESSED_SCREEN_CONFIG = {
 }
 
 const tomatoStyle = (fn) => (
-  POMODORO_MODE && fn()
+  POMODORO_MODE ? fn : I
 )
 
 const pomodoroHandlers = map(tomatoStyle, {
@@ -117,7 +117,7 @@ const makeGraphBox = pipe(
 
 const updateCommitsGraph = (today, week) => commits.setData(
   {
-    titles: [`today`, `week`],
+    titles: [`24h`, `week`],
     data: [today, week]
   }
 )

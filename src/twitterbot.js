@@ -1,10 +1,22 @@
 import Twit from 'twit'
 import scraperjs from 'scraperjs'
-import {pipe, random, indexOf} from 'f-utility'
+import {
+  I,
+  curry,
+  map,
+  flip,
+  pipe,
+  random,
+  indexOf
+} from 'f-utility'
+import {e1} from 'entrust'
 import Future from 'fluture'
 
 import config from './config'
 import barf from './barf'
+
+const find = e1(`find`)
+const ofIndex = flip(indexOf)
 
 const T = new Twit({
   consumer_key: config.keys.consumer_key,
@@ -42,12 +54,23 @@ const scrapeTweets = ($) => $(`.js-tweet-text.tweet-text`).map(
   }
 ).get()
 
+const addSpaceAtLocation = curry((location, str) => (
+  str.substr(0, location) + ` ` + str.substr(location)
+))
+
+const firstTruthy = curry(
+  (list, str) => pipe(
+    map(ofIndex(str)),
+    find(I)
+  )(list)
+)
+
 const fixLinks = (x) => {
-  const pics = indexOf(`pic.twitter`, x)
+  const location = firstTruthy([`pic.twitter`, `http`], x)
   return (
-    pics === -1 ?
+    location === -1 ?
       x :
-      x.substr(0, pics) + ` ` + x.substr(pics)
+      addSpaceAtLocation(location, x)
   )
 }
 const futurify = (x) => new Future((reject, resolve) => {
