@@ -3,6 +3,7 @@ import parseGitConfig from 'parse-git-config'
 import pathExists from 'path-exists'
 import {e0, e1} from 'entrust'
 import {
+  isString,
   curry,
   K,
   map,
@@ -14,7 +15,7 @@ import {
   split,
   keys
 } from 'f-utility'
-// import {trace} from 'xtrace'
+import {trace} from 'xtrace'
 import Future from 'fluture'
 
 const checkPathExists = Future.encaseP(pathExists)
@@ -28,9 +29,10 @@ const parser = (cwd) => new Future(
 // const parser = Future.encaseN(iniparser.parse)
 
 const pop = e0(`pop`)
-const mapRej = e1(`chainRej`)
+const mapRej = e1(`mapRej`)
 
 const getFolderName = pipe(
+  trace(`input to folder name`),
   split(`\\`),
   pop
 )
@@ -60,14 +62,17 @@ const inAllBadCasesReturnFalse = pipe(
   mapRej
 )(false)
 
-const isGit = (path) => pipe(
-  getFolderName,
-  forceTrailingSlash,
-  add(`.git/config`),
-  checkPathExists,
-  chain(parseConfig(path)),
-  map(checkForCore),
-  inAllBadCasesReturnFalse
-)(path)
-
-export default isGit
+export const isGit = (path) => {
+  if (!isString(path)) {
+    return Future.reject(new TypeError(`Expected to be given string to check as path.`))
+  }
+  return pipe(
+    getFolderName,
+    forceTrailingSlash,
+    add(`.git/config`),
+    checkPathExists,
+    chain(parseConfig(path)),
+    map(checkForCore),
+    inAllBadCasesReturnFalse
+  )(path)
+}
